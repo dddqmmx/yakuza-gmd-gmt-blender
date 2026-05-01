@@ -75,6 +75,8 @@ class RealImportSmokeTests(unittest.TestCase):
 
         gmt_result = bpy.ops.import_scene.gmt(
             filepath=str(GMT_PATH),
+            directory=str(GMT_PATH.parent),
+            files=[{"name": GMT_PATH.name}],
             armature_name=armature.name,
             merge_vector_curves=True,
             is_auth=False,

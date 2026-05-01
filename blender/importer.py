@@ -1,10 +1,10 @@
 from copy import deepcopy
-from os.path import basename
+from os.path import basename, join
 from typing import Dict
 
 import bpy
-from bpy.props import BoolProperty, EnumProperty, StringProperty
-from bpy.types import Action, Operator
+from bpy.props import BoolProperty, CollectionProperty, EnumProperty, StringProperty
+from bpy.types import Action, Operator, OperatorFileListElement
 from bpy_extras.io_utils import ImportHelper
 from mathutils import Quaternion, Vector
 
@@ -32,10 +32,21 @@ class ImportGMT(Operator, ImportHelper):
 
     filter_glob: StringProperty(default="*.gmt;*.cmt;*.ifa", options={"HIDDEN"})
 
+    files: CollectionProperty(
+        name="Animation Files",
+        type=OperatorFileListElement,
+        options={"HIDDEN"},
+    )
+
+    directory: StringProperty(
+        subtype="DIR_PATH",
+        options={"HIDDEN"},
+    )
+
     def armature_callback(self, context):
         items = []
         ao = context.active_object
-        ao_name = ao.name
+        ao_name = ao.name if ao else None
 
         if ao and ao.type == 'ARMATURE':
             # Add the selected armature first so that it's the default value
@@ -85,30 +96,65 @@ class ImportGMT(Operator, ImportHelper):
     def execute(self, context):
         import time
 
+        filepaths = self._selected_filepaths()
+        if not filepaths:
+            self.report({"ERROR"}, "No animation file selected")
+            return {'CANCELLED'}
+
+        start_time = time.time()
+        imported = []
+        failed = []
+
+        keywords = self.as_keywords(ignore=("filter_glob", "files", "directory"))
+        for filepath in filepaths:
+            try:
+                self._import_file(context, filepath, keywords)
+                imported.append(filepath)
+                self.report({"INFO"}, f"Finished importing {basename(filepath)}")
+            except GMTError as error:
+                print("Catching Error")
+                print(error)
+                failed.append((filepath, str(error)))
+
+        elapsed_s = "{:.2f}s".format(time.time() - start_time)
+        print("Import finished in " + elapsed_s)
+
+        if failed:
+            failed_names = ", ".join(basename(filepath) for filepath, _ in failed[:3])
+            more = "" if len(failed) <= 3 else f" and {len(failed) - 3} more"
+            self.report(
+                {"WARNING" if imported else "ERROR"},
+                f"Imported {len(imported)} animation file(s), failed {len(failed)}: {failed_names}{more}",
+            )
+            return {'FINISHED'} if imported else {'CANCELLED'}
+
+        self.report({"INFO"}, f"Imported {len(imported)} animation file(s)")
+        return {'FINISHED'}
+
+    def _selected_filepaths(self):
+        if self.files:
+            return [join(self.directory, file.name) for file in self.files]
+
+        return [self.filepath] if self.filepath else []
+
+    def _import_file(self, context, filepath, keywords):
         try:
-            if self.filepath.endswith('.cmt'):
+            lower_filepath = filepath.lower()
+            if lower_filepath.endswith('.cmt'):
                 importer_cls = CMTImporter
             else:
                 arm = self.check_armature(context)
                 if isinstance(arm, str):
                     raise GMTError(arm)
 
-                importer_cls = IFAImporter if self.filepath.endswith('.ifa') else GMTImporter
+                importer_cls = IFAImporter if lower_filepath.endswith('.ifa') else GMTImporter
 
-            start_time = time.time()
-            importer = importer_cls(context, self.filepath, self.as_keywords(ignore=("filter_glob",)))
+            importer = importer_cls(context, filepath, keywords)
             importer.read()
-
-            elapsed_s = "{:.2f}s".format(time.time() - start_time)
-            print("Import finished in " + elapsed_s)
-
-            self.report({"INFO"}, f"Finished importing {basename(self.filepath)}")
-            return {'FINISHED'}
         except GMTError as error:
-            print("Catching Error")
-            self.report({"ERROR"}, str(error))
-
-        return {'CANCELLED'}
+            raise error
+        except Exception as error:
+            raise GMTError(f"{basename(filepath)}: {error}")
 
     def check_armature(self, context: bpy.context):
         """Sets the active object to be the armature chosen by the user"""

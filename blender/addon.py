@@ -7,6 +7,7 @@ from .action_compat import iter_action_fcurves
 from .exporter import ExportGMT, menu_func_export
 from .importer import ImportGMT, create_pose_bone_type, menu_func_import
 from .pattern import GMTPatternIndicesPanel, GMTPatternPanel
+from .retarget import RetargetYakuzaAction, menu_func_retarget
 
 # from .pattern import apply_patterns
 
@@ -75,6 +76,7 @@ classes = (
     ExportGMT,
     GMTPatternPanel,
     GMTPatternIndicesPanel,
+    RetargetYakuzaAction,
     StringPropertyGroup,
     # GMTPatternPreferences,
 )
@@ -111,6 +113,7 @@ def register_addon():
     # Add to the export / import menu
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
+    bpy.types.VIEW3D_MT_object.append(menu_func_retarget)
 
     # Store a collection in the scene to save new pattern types created while importing
     setattr(bpy.types.Scene, 'pattern_types', bpy.props.CollectionProperty(type=StringPropertyGroup))
@@ -143,6 +146,7 @@ def unregister_addon():
     # Remove from the export / import menu
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
+    bpy.types.VIEW3D_MT_object.remove(menu_func_retarget)
 
     # Remove handlers
     bpy.app.handlers.load_post.remove(load_pattern_types)

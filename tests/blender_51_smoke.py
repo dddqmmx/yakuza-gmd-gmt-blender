@@ -58,11 +58,11 @@ def add_fcurve(action, group_name, data_path, index, frames, values, datablock):
     return fcurve
 
 
-def make_armature_with_center_bone():
+def make_armature_with_center_bone(name="TestArmature"):
     bpy.ops.object.armature_add(enter_editmode=True)
     armature = bpy.context.object
-    armature.name = "TestArmature"
-    armature.data.name = "TestArmatureData"
+    armature.name = name
+    armature.data.name = f"{name}Data"
 
     bone = armature.data.edit_bones[0]
     bone.name = "center_c_n"
@@ -168,6 +168,7 @@ class Blender51SmokeTests(unittest.TestCase):
             self.assertTrue(hasattr(bpy.types.Object, "yakuza_file_root_data"))
             self.assertTrue(hasattr(bpy.types.Bone, "yakuza_hierarchy_node_data"))
             bpy.ops.import_scene.gmt.get_rna_type()
+            bpy.ops.anim.yakuza_retarget_action.get_rna_type()
             bpy.ops.export_scene.gmt.get_rna_type()
             bpy.ops.import_scene.gmd_skinned.get_rna_type()
             bpy.ops.import_scene.gmd_unskinned.get_rna_type()
@@ -286,6 +287,37 @@ class Blender51SmokeTests(unittest.TestCase):
         self.assertIsNotNone(find_action_fcurve(imported_action, "location", index=0, datablock=camera))
         self.assertIsNotNone(find_action_fcurve(imported_action, "rotation_quaternion", index=0, datablock=camera))
         self.assertIsNotNone(find_action_fcurve(imported_action, "data.lens", index=0, datablock=camera))
+
+    def test_retarget_action_copies_animation_to_matching_armature(self):
+        self.addon.register()
+        try:
+            source = make_armature_with_center_bone("SourceArmature")
+            target = make_armature_with_center_bone("TargetArmature")
+            action = make_gmt_action(source)
+
+            result = bpy.ops.anim.yakuza_retarget_action(
+                source_armature_name=source.name,
+                target_armature_name=target.name,
+                action_name=action.name,
+                new_action_name="retargeted_run",
+            )
+            self.assertEqual(result, {"FINISHED"})
+            self.assertIsNotNone(target.animation_data)
+            self.assertIsNotNone(target.animation_data.action)
+            self.assertEqual(target.animation_data.action.name, "retargeted_run")
+
+            from yakuza_gmd_gmt_blender.blender.action_compat import find_action_fcurve
+
+            self.assertIsNotNone(
+                find_action_fcurve(
+                    target.animation_data.action,
+                    'pose.bones["center_c_n"].location',
+                    index=0,
+                    datablock=target,
+                )
+            )
+        finally:
+            self.addon.unregister()
 
 
 if __name__ == "__main__":
