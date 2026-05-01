@@ -124,3 +124,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .vscode/settings.json
+
+# Blender addon updater runtime state
+*_updater/
+
+# Blender backup files
+*.blend1
