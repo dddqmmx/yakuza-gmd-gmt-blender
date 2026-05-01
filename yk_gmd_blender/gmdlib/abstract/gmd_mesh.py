@@ -127,8 +127,19 @@ class GMDSkinnedMesh(GMDMesh):
 
     def __post_init__(self):
         super().__post_init__()
-        referenced_bone_indices = set(np.unique(
-            np.where(self.vertices_data.weight_data > 0, self.vertices_data.bone_data, -1)).flatten())
+        if len(self.relevant_bones) <= 255:
+            sentinel_bone_slots = self.vertices_data.bone_data == 255
+            if np.any(sentinel_bone_slots):
+                self.vertices_data.weight_data[sentinel_bone_slots] = 0
+                self.vertices_data.bone_data[sentinel_bone_slots] = 0
+
+        bone_data = self.vertices_data.bone_data.astype(np.int32, copy=False)
+        referenced_bone_indices = {
+            int(i)
+            for i in np.unique(
+                np.where(self.vertices_data.weight_data > 0, bone_data, -1)
+            ).flatten()
+        }
         referenced_bone_indices.discard(-1)
         if not self.empty and (not referenced_bone_indices or not self.relevant_bones):
             raise TypeError(

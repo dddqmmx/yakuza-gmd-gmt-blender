@@ -348,7 +348,8 @@ def set_yakuza_shader_material_from_attributeset(material: bpy.types.Material, y
                     material.blend_method = "HASHED"
                 else:
                     material.blend_method = "BLEND"
-                material.shadow_method = "NONE"
+                if hasattr(material, "shadow_method"):
+                    material.shadow_method = "NONE"
 
     # Attach the other textures.
     multi_tex, next_y = set_texture(yakuza_inputs["texture_multi"], attribute_set.texture_multi, next_y,
