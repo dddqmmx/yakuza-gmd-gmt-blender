@@ -36,6 +36,10 @@ blender --background --factory-startup --python tests/blender_51_smoke.py
 # Credits
 Thanks to **CGCookie** for the [Blender addon updater](https://github.com/CGCookie/blender-addon-updater) module.
 
+Original authors:
+- **SutandoTsukai181** for `yakuza-gmt-blender`, which provides GMT animation import/export and CMT camera animation support.
+- **Samuel Stark (TheTurboTurnip)** for `yk_gmd_io`, which provides GMD model import/export support.
+
 GMD model import/export support is integrated from **Samuel Stark (TheTurboTurnip)**'s `yk_gmd_io` project, cloned from `git@github.com:theturboturnip/yk_gmd_io.git` at commit `32016a1`.
 
 ***
