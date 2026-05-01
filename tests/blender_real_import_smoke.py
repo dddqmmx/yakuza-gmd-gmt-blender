@@ -1,4 +1,5 @@
 import importlib.util
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -8,8 +9,34 @@ import bpy
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "yakuza_gmd_gmt_blender"
-GMD_PATH = Path("/home/dddqmmx/project/test/yakuza-unpack/c_at_kiryu_origin/c_at_kiryu_origin.gmd")
-GMT_PATH = Path("/home/dddqmmx/project/test/yakuza-unpack/motion/P_MOV_run_L.gmt")
+ENV_PATH = ROOT / ".env"
+
+
+def load_dotenv(path):
+    if not path.exists():
+        return
+
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(key, value)
+
+
+load_dotenv(ENV_PATH)
+
+
+def env_path(name):
+    value = os.environ.get(name)
+    return Path(value) if value else None
+
+
+GMD_PATH = env_path("YAKUZA_TEST_GMD_PATH")
+GMT_PATH = env_path("YAKUZA_TEST_GMT_PATH")
 
 
 def load_addon_package():
@@ -39,7 +66,10 @@ def reset_scene():
         bpy.data.actions.remove(action)
 
 
-@unittest.skipUnless(GMD_PATH.exists() and GMT_PATH.exists(), "real import fixture files are not available")
+@unittest.skipUnless(
+    GMD_PATH and GMD_PATH.exists() and GMT_PATH and GMT_PATH.exists(),
+    "real import fixture files are not available",
+)
 class RealImportSmokeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
