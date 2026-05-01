@@ -1,27 +1,42 @@
-# yakuza_gmt_blender
- Blender Import/Export addon for Yakuza series GMT animation files. Can also import CMT camera animations. Supports Blender versions >= 2.93 and <= 3.2.
+# yakuza-gmt-gmd-blender
+Blender Import/Export addon for Yakuza series GMT animation files, CMT camera animations, and GMD model files. Supports Blender versions >= 3.2 and <= 5.1.
+
+This project integrates:
+- GMT/CMT animation support from `yakuza-gmt-blender`
+- GMD model support from `git@github.com:theturboturnip/yk_gmd_io.git`
  
 ***
  
 # Installing
-Download the [latest release](https://github.com/SutandoTsukai181/yakuza-gmt-blender/releases/latest) and install it in Blender. To do so, follow the instructions in the [official Blender manual](https://docs.blender.org/manual/en/latest/editors/preferences/addons.html) for installing add-ons, or follow the brief instructions below.
+Download the latest release zip and install it in Blender. To do so, follow the instructions in the [official Blender manual](https://docs.blender.org/manual/en/latest/editors/preferences/addons.html) for installing add-ons, or follow the brief instructions below.
 
 Open the `Edit` -> `Preferences` window from the menu bar, go to `Add-ons`, click on the `Install` button, and select the release zip you downloaded. Then, enable the script by checking the box next to it.
 
 ***
 
 # Updating
-The addon includes an auto-update checker that is enabled by default. It will check for updates every time Blender is launched, once a day at most. You can also go to the addon preferences to check for an update manually. You can find more information about this feature [here](https://github.com/SutandoTsukai181/yakuza-gmt-blender/wiki/Addon-Options#addon-preferences).
+The addon includes an auto-update checker that is enabled by default. It will check for updates every time Blender is launched, once a day at most. You can also go to the addon preferences to check for an update manually.
 
 ***
 
 # Usage
-Check the [wiki](https://github.com/SutandoTsukai181/yakuza-gmt-blender/wiki) for guides and usage info.
+After enabling the addon, the File > Import and File > Export menus include GMT/CMT animation entries and GMD model entries.
+
+***
+
+# Testing
+Run the Blender compatibility smoke tests with:
+
+```sh
+blender --background --factory-startup --python tests/blender_51_smoke.py
+```
 
 ***
 
 # Credits
 Thanks to **CGCookie** for the [Blender addon updater](https://github.com/CGCookie/blender-addon-updater) module.
+
+GMD model import/export support is integrated from **Samuel Stark (TheTurboTurnip)**'s `yk_gmd_io` project, cloned from `git@github.com:theturboturnip/yk_gmd_io.git` at commit `32016a1`.
 
 ***
 

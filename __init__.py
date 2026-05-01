@@ -1,19 +1,24 @@
+import sys
+
 import bpy
 
 from . import addon_updater_ops
 from .addon_updater_prefs import GMTUpdaterPreferences
+from . import yk_gmd_blender as _yk_gmd_blender
+
+sys.modules.setdefault("yk_gmd_blender", _yk_gmd_blender)
 
 # Include the bl_info at the top level always
 bl_info = {
-    "name": "Yakuza GMT File Import/Export",
-    "author": "SutandoTsukai181",
-    "version": (1, 1, 2),
-    "blender": (2, 93, 0),
+    "name": "Yakuza GMT/GMD File Import/Export",
+    "author": "SutandoTsukai181, Samuel Stark (TheTurboTurnip)",
+    "version": (2, 0, 0),
+    "blender": (3, 2, 0),
     "location": "File > Import-Export",
-    "description": "Import-Export Yakuza GMT Files",
+    "description": "Import-Export Yakuza GMT animation, CMT camera, and GMD model files",
     "warning": "",
-    "doc_url": "https://github.com/SutandoTsukai181/yakuza-gmt-blender/wiki",
-    "tracker_url": "https://github.com/SutandoTsukai181/yakuza-gmt-blender/issues",
+    "doc_url": "",
+    "tracker_url": "",
     "category": "Import-Export",
 }
 
@@ -37,6 +42,7 @@ def register():
     from .blender.addon import register_addon
 
     register_addon()
+    _yk_gmd_blender.register()
 
 
 def unregister():
@@ -47,4 +53,5 @@ def unregister():
 
     from .blender.addon import unregister_addon
 
+    _yk_gmd_blender.unregister()
     unregister_addon()

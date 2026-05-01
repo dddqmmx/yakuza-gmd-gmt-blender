@@ -3,6 +3,7 @@ from bpy.app.handlers import persistent
 from bpy.props import BoolProperty, StringProperty
 from bpy.types import AddonPreferences
 
+from .action_compat import iter_action_fcurves
 from .exporter import ExportGMT, menu_func_export
 from .importer import ImportGMT, create_pose_bone_type, menu_func_import
 from .pattern import GMTPatternIndicesPanel, GMTPatternPanel
@@ -83,7 +84,8 @@ classes = (
 # Currently unused, since pattern previewing is disabled
 def change_interpolation(scene):
     if bpy.context.active_object and bpy.context.active_object.animation_data:
-        for f in bpy.context.active_object.animation_data.action.fcurves:
+        action = bpy.context.active_object.animation_data.action
+        for f in iter_action_fcurves(action, bpy.context.active_object):
             if 'pat' in f.data_path:
                 for k in f.keyframe_points:
                     k.interpolation = 'CONSTANT'

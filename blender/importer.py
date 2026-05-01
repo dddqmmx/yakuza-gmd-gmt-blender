@@ -12,6 +12,7 @@ from ..gmt_lib import *
 from ..gmt_lib.gmt.gmt_reader import read_cmt, read_ifa
 from ..gmt_lib.gmt.structure.cmt import *
 from ..gmt_lib.gmt.structure.ifa import *
+from .action_compat import new_action_fcurve
 from .bone_props import GMTBlenderBoneProps, get_edit_bones_props
 from .coordinate_converter import (convert_cmt_anm_to_blender,
                                    convert_gmt_curve_to_blender,
@@ -186,14 +187,14 @@ class IFAImporter:
 
         # Instead of rewriting the curve importing functions, we can just convert the IFA bones to GMT curves
         for bone in self.ifa.bone_list:
-            group = action.groups.new(bone.name)
+            group_name = bone.name
 
             for curve_values, curve_type in zip((bone.location, bone.rotation), (GMTCurveType.LOCATION, GMTCurveType.ROTATION)):
                 curve = GMTCurve(curve_type)
                 curve.keyframes.append(GMTKeyframe(0, curve_values))
 
                 convert_gmt_curve_to_blender(curve)
-                import_curve(self.context, curve, bone.name, action, group.name, bone_props)
+                import_curve(self.context, curve, bone.name, action, group_name, bone_props, ao)
 
         self.context.scene.frame_start = 0
         self.context.scene.frame_current = 0
@@ -241,7 +242,7 @@ class CMTImporter:
 
     def make_action(self, anm: CMTAnimation, action_name):
         action = self.camera.animation_data.action = bpy.data.actions.new(name=action_name)
-        group = action.groups.new("Camera")
+        group_name = "Camera"
 
         # Convert the CMT frames before importing anything
         convert_cmt_anm_to_blender(anm, self.camera.data)
@@ -251,7 +252,7 @@ class CMTImporter:
             values = enumerate(zip(*values)) if hasattr(values[0], '__iter__') else [(-1, values)]
 
             for i, values_channel in values:
-                fcurve = action.fcurves.new(data_path=data_path, index=i, action_group=group.name)
+                fcurve = new_action_fcurve(action, data_path, i, group_name, self.camera)
                 fcurve.keyframe_points.add(len(values_channel))
                 fcurve.keyframe_points.foreach_set('co', [x for co in zip(
                     range(len(values_channel)), values_channel) for x in co])
@@ -332,11 +333,11 @@ class GMTImporter:
                 merge_vector(bones.get('center_c_n'), bones.get('vector_c_n'), vector_version, self.is_auth)
 
             for bone_name in bones:
-                group = action.groups.new(bone_name)
-                print(f'Importing ActionGroup: {group.name}')
+                group_name = bone_name
+                print(f'Importing ActionGroup: {group_name}')
 
                 for curve in bones[bone_name].curves:
-                    import_curve(self.context, curve, bone_name, action, group.name, anm_bone_props)
+                    import_curve(self.context, curve, bone_name, action, group_name, anm_bone_props, ao)
 
         # If pattern previewing is to be enabled later, this should be moved to the addon register function instead
         # Although that may require bone.par path in order to import the patterns with the basic skeleton GMDs
@@ -454,7 +455,7 @@ def add_curve(curve: GMTCurve, other: GMTCurve, expected_curve_type: GMTCurveTyp
     return curve
 
 
-def import_curve(context: bpy.context, curve: GMTCurve, bone_name: str, action: Action, group_name: str, bone_props: Dict[str, GMTBlenderBoneProps]):
+def import_curve(context: bpy.context, curve: GMTCurve, bone_name: str, action: Action, group_name: str, bone_props: Dict[str, GMTBlenderBoneProps], datablock=None):
     data_path = get_data_path_from_curve_type(context, curve.type, curve.channel)
 
     if data_path == '' or len(curve.keyframes) == 0:
@@ -479,8 +480,13 @@ def import_curve(context: bpy.context, curve: GMTCurve, bone_name: str, action: 
         return
 
     for i, values_channel in enumerate(zip(*values)):
-        fcurve = action.fcurves.new(data_path=(
-            f'pose.bones["{bone_name}"].{data_path}'), index=i, action_group=group_name)
+        fcurve = new_action_fcurve(
+            action,
+            f'pose.bones["{bone_name}"].{data_path}',
+            i,
+            group_name,
+            datablock,
+        )
         fcurve.keyframe_points.add(len(frames))
         fcurve.keyframe_points.foreach_set('co', [x for co in zip(frames, values_channel) for x in co])
 

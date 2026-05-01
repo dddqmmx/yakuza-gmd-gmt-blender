@@ -6,7 +6,7 @@ from . import addon_updater_ops
 
 @addon_updater_ops.make_annotations
 class GMTUpdaterPreferences(bpy.types.AddonPreferences):
-	"""Updater preferences for yakuza_gmt_blender"""
+	"""Updater preferences for yakuza_gmt_gmd_blender"""
 	bl_idname = __package__
 
 	# Addon updater preferences.
