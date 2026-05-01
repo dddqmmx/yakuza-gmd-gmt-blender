@@ -1,4 +1,4 @@
-# yakuza-gmt-gmd-blender
+# yakuza-gmd-gmt-blender
 Blender Import/Export addon for Yakuza series GMT animation files, CMT camera animations, and GMD model files. Supports Blender versions >= 3.2 and <= 5.1.
 
 This project integrates:

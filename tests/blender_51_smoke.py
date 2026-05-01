@@ -9,7 +9,7 @@ from mathutils import Quaternion
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_NAME = "yakuza_gmt_gmd_blender"
+PACKAGE_NAME = "yakuza_gmd_gmt_blender"
 
 
 def load_addon_package():
@@ -46,7 +46,7 @@ def reset_scene():
 
 
 def add_fcurve(action, group_name, data_path, index, frames, values, datablock):
-    from yakuza_gmt_gmd_blender.blender.action_compat import new_action_fcurve
+    from yakuza_gmd_gmt_blender.blender.action_compat import new_action_fcurve
 
     fcurve = new_action_fcurve(action, data_path, index, group_name, datablock)
     fcurve.keyframe_points.add(len(frames))
@@ -146,7 +146,7 @@ class Blender51SmokeTests(unittest.TestCase):
         reset_scene()
 
     def test_make_annotations_handles_missing_annotations_on_python_313(self):
-        from yakuza_gmt_gmd_blender import addon_updater_ops
+        from yakuza_gmd_gmt_blender import addon_updater_ops
 
         class DummyOperator:
             enabled = bpy.props.BoolProperty(default=True)
@@ -188,9 +188,9 @@ class Blender51SmokeTests(unittest.TestCase):
         self.assertFalse(hasattr(bpy.types.Bone, "yakuza_hierarchy_node_data"))
 
     def test_gmt_export_import_round_trip(self):
-        from yakuza_gmt_gmd_blender.blender.exporter import GMTExporter
-        from yakuza_gmt_gmd_blender.blender.importer import GMTImporter
-        from yakuza_gmt_gmd_blender.gmt_lib.gmt.gmt_reader import read_gmt
+        from yakuza_gmd_gmt_blender.blender.exporter import GMTExporter
+        from yakuza_gmd_gmt_blender.blender.importer import GMTImporter
+        from yakuza_gmd_gmt_blender.gmt_lib.gmt.gmt_reader import read_gmt
 
         armature = make_armature_with_center_bone()
         action = make_gmt_action(armature)
@@ -225,7 +225,7 @@ class Blender51SmokeTests(unittest.TestCase):
             ).read()
 
         imported_action = armature.animation_data.action
-        from yakuza_gmt_gmd_blender.blender.action_compat import find_action_fcurve
+        from yakuza_gmd_gmt_blender.blender.action_compat import find_action_fcurve
 
         self.assertEqual(imported_action.name, "test_anim[roundtrip]")
         self.assertIsNotNone(
@@ -246,9 +246,9 @@ class Blender51SmokeTests(unittest.TestCase):
         )
 
     def test_cmt_export_import_round_trip(self):
-        from yakuza_gmt_gmd_blender.blender.exporter import CMTExporter
-        from yakuza_gmt_gmd_blender.blender.importer import CMTImporter
-        from yakuza_gmt_gmd_blender.gmt_lib.gmt.gmt_reader import read_cmt
+        from yakuza_gmd_gmt_blender.blender.exporter import CMTExporter
+        from yakuza_gmd_gmt_blender.blender.importer import CMTImporter
+        from yakuza_gmd_gmt_blender.gmt_lib.gmt.gmt_reader import read_cmt
 
         camera_data = bpy.data.cameras.new(name="Camera")
         camera = bpy.data.objects.new("Camera", camera_data)
@@ -280,7 +280,7 @@ class Blender51SmokeTests(unittest.TestCase):
             CMTImporter(bpy.context, str(filepath), {}).read()
 
         imported_action = camera.animation_data.action
-        from yakuza_gmt_gmd_blender.blender.action_compat import find_action_fcurve
+        from yakuza_gmd_gmt_blender.blender.action_compat import find_action_fcurve
 
         self.assertEqual(imported_action.name, "roundtrip.cmt")
         self.assertIsNotNone(find_action_fcurve(imported_action, "location", index=0, datablock=camera))

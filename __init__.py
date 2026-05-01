@@ -10,7 +10,7 @@ sys.modules.setdefault("yk_gmd_blender", _yk_gmd_blender)
 
 # Include the bl_info at the top level always
 bl_info = {
-    "name": "Yakuza GMT/GMD File Import/Export",
+    "name": "Yakuza GMD/GMT File Import/Export",
     "author": "SutandoTsukai181, Samuel Stark (TheTurboTurnip)",
     "version": (2, 0, 0),
     "blender": (3, 2, 0),

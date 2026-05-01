@@ -1,6 +1,6 @@
 # Authors and Upstream Credits
 
-This project, `yakuza-gmt-gmd-blender`, combines functionality from two upstream Blender addons:
+This project, `yakuza-gmd-gmt-blender`, combines functionality from two upstream Blender addons:
 
 - `yakuza-gmt-blender` by SutandoTsukai181
   - Provides GMT animation import/export and CMT camera animation support.
